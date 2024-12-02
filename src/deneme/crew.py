@@ -40,6 +40,13 @@ class Deneme():
 		return output
 
 	@agent
+	def flort_agent(self) -> Agent:
+		return Agent(
+			config=self.agents_config['flort_agent'],
+			llm=llm(),
+		)
+
+	@agent
 	def researcher(self) -> Agent:
 		print(os.environ.values())
 		print("naber")
@@ -56,6 +63,16 @@ class Deneme():
 			config=self.agents_config['reporting_analyst'],
 			llm=llm(),
 			#verbose=True
+		)
+
+	@task
+	def flort_task(self) -> Task:
+		return Task(
+			config=self.tasks_config['flort_task'],
+			expected_output="Kullanıcı mesajına uygun, samimi ve doğal bir yanıt metni.",
+			async_execution=False,
+			human_input=True,
+			description="Kullanıcı mesajına Elif karakteri olarak yanıt ver"
 		)
 
 	@task
