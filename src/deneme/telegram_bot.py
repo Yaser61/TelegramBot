@@ -1,41 +1,49 @@
+import logging
+
 from dotenv import load_dotenv
 import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from deneme.crew import Deneme
+from pydantic import BaseModel
+
 
 load_dotenv()
 
+class TaskOutputModel(BaseModel):
+    description: str
+    summary: str
+    raw: str
 
 # LLM ile iletişim kurmak için Flort agent kullanımı
 async def flort_response(user_message: str) -> str:
-    inputs = {
-        "topic": "Sohbet",
-        "flort_task": {
-            "input": f"Kullanıcı şunu söyledi: {user_message}. Bu mesaja Elif karakteri olarak samimi ve doğal bir şekilde yanıt ver."
-        }
-    }
     try:
-        result = Deneme().crew().kickoff(inputs=inputs)
+        crew = Deneme().crew()
 
-        # CrewOutput nesnesinin tüm özelliklerini yazdır
-        print("CrewOutput Attributes:", dir(result))
-        print("CrewOutput:", result)
+        # Dinamik input oluşturma
+        inputs = {
+            "conversation_context": {
+                "user_message": user_message,  # Kullanıcıdan gelen mesaj
+            }
+        }
 
-        # Çıktıyı alma girişimi
-        if hasattr(result, 'output'):
-            print("Output:", result.output)
-            return result.output
-        elif hasattr(result, 'tasks') and result.tasks:
-            print("Tasks:", result.tasks)
-            return result.tasks[0].output or "Yanıt üretilemedi"
+        print(f"Inputs: {inputs}")
+
+        # Crew çalıştırma
+        print(f"Inputs to kickoff: {inputs}")
+        result = crew.kickoff(inputs=inputs)
+        print(f"Result: {result}")
+
+        # Sonuçtan görevin çıktısını al, doğrudan result'u kullanabilirsiniz
+        if result:
+            return str(result).strip()  # result zaten doğru şekilde döndürülmüşse, doğrudan kullanabilirsiniz
         else:
-            return "Yanıt üretilemedi"
+            return "Görev sonucu bulunamadı"
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return f"Hata: {e}"
+        logging.error(f"Crew execution error: {e}")
+        return "Şu anda yanıt veremiyorum. Daha sonra tekrar deneyin."
+
 
 
 # /start komutu için işlev
@@ -46,7 +54,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Mesajları işleyen işlev
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
+    print(f"kullanıcı mesajı: {user_message}")
     response = await flort_response(user_message)
+
+    print(f"Telegram Response: {response}")
+
     await update.message.reply_text(response)
 
 

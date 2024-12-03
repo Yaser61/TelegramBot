@@ -16,7 +16,9 @@ def run():
     Run the crew.
     """
     inputs = {
-        'topic': 'AI LLMs'
+        "conversation_context": {
+            "user_message": "Bana matematik sorusu sor?"
+        }
     }
     Deneme().crew().kickoff(inputs=inputs)
 
@@ -26,7 +28,7 @@ def train():
     Train the crew for a given number of iterations.
     """
     inputs = {
-        "topic": "AI LLMs"
+        #"topic": "AI LLMs"
     }
     try:
         Deneme().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
@@ -49,7 +51,7 @@ def test():
     Test the crew execution and returns the results.
     """
     inputs = {
-        "topic": "AI LLMs"
+        #"topic": "AI LLMs"
     }
     try:
         Deneme().crew().test(n_iterations=int(sys.argv[1]), openai_model_name=sys.argv[2], inputs=inputs)

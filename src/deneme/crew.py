@@ -46,47 +46,13 @@ class Deneme():
 			llm=llm(),
 		)
 
-	@agent
-	def researcher(self) -> Agent:
-		print(os.environ.values())
-		print("naber")
-		return Agent(
-			config=self.agents_config['researcher'],
-			llm=llm(),
-			# tools=[MyCustomTool()], # Example of custom tool, loaded on the beginning of file
-			#verbose=True
-		)
-
-	@agent
-	def reporting_analyst(self) -> Agent:
-		return Agent(
-			config=self.agents_config['reporting_analyst'],
-			llm=llm(),
-			#verbose=True
-		)
 
 	@task
 	def flort_task(self) -> Task:
 		return Task(
-			config=self.tasks_config['flort_task'],
-			expected_output="Kullanıcı mesajına uygun, samimi ve doğal bir yanıt metni.",
-			async_execution=False,
-			human_input=True,
-			description="Kullanıcı mesajına Elif karakteri olarak yanıt ver"
+			config=self.tasks_config['flort_task']
 		)
 
-	@task
-	def research_task(self) -> Task:
-		return Task(
-			config=self.tasks_config['research_task'],
-		)
-
-	@task
-	def reporting_task(self) -> Task:
-		return Task(
-			config=self.tasks_config['reporting_task'],
-			output_file='report.md'
-		)
 
 	@crew
 	def crew(self) -> Crew:
@@ -96,5 +62,6 @@ class Deneme():
 			tasks=self.tasks, # Automatically created by the @task decorator
 			process=Process.sequential,
 			verbose=True,
+
 			# process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
 		)
