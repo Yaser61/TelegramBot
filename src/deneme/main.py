@@ -2,7 +2,7 @@
 import sys
 import warnings
 
-from deneme.crew import Deneme
+from deneme.crew import Deneme, PhotoDecision, VoiceDecision, TexttoPhoto
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -20,7 +20,6 @@ def run():
             "user_message": "Bana matematik sorusu sor?"
         }
     }
-    Deneme().crew().kickoff(inputs=inputs)
 
 
 def train():
@@ -30,21 +29,11 @@ def train():
     inputs = {
         #"topic": "AI LLMs"
     }
-    try:
-        Deneme().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
-
-    except Exception as e:
-        raise Exception(f"An error occurred while training the crew: {e}")
 
 def replay():
     """
     Replay the crew execution from a specific task.
     """
-    try:
-        Deneme().crew().replay(task_id=sys.argv[1])
-
-    except Exception as e:
-        raise Exception(f"An error occurred while replaying the crew: {e}")
 
 def test():
     """
@@ -53,8 +42,3 @@ def test():
     inputs = {
         #"topic": "AI LLMs"
     }
-    try:
-        Deneme().crew().test(n_iterations=int(sys.argv[1]), openai_model_name=sys.argv[2], inputs=inputs)
-
-    except Exception as e:
-        raise Exception(f"An error occurred while replaying the crew: {e}")

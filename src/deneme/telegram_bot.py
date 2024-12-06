@@ -1,10 +1,10 @@
 import logging
-
+from crewai.flow.flow import listen
 from dotenv import load_dotenv
 import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-from deneme.crew import Deneme
+from deneme.crew import Deneme, PhotoDecision, VoiceDecision, TexttoPhoto
 from pydantic import BaseModel
 
 
@@ -14,6 +14,60 @@ class TaskOutputModel(BaseModel):
     description: str
     summary: str
     raw: str
+
+async def should_use_photo(user_message: str) -> bool:
+    try:
+        crew = PhotoDecision().crew()
+
+        # Kullanıcı mesajını ajan için input olarak gönderiyoruz
+        inputs = {
+            "conversation_context": {
+                "user_message": user_message,
+            }
+        }
+
+        # Fotoğraf kararı veren ajanı çalıştır
+        photo_decision = crew.kickoff(inputs=inputs)
+
+        logging.info(f"Photo decision result: {photo_decision}")
+
+        if photo_decision and photo_decision.lower() == "yes":
+            return True
+        return False
+
+    except Exception as e:
+        logging.error(f"Photo decision error: {e}")
+        return False
+
+@listen(should_use_photo)
+async def generate_photo(user_message: str) -> str:
+    """
+    TextToPhoto görevini kullanarak fotoğraf oluştur.
+    """
+    try:
+        crew = TexttoPhoto().crew()
+
+        # Kullanıcı mesajını input olarak gönderiyoruz
+        inputs = {
+            "conversation_context": {
+                "user_message": user_message
+            }
+        }
+
+        # Fotoğraf oluşturma görevini başlat
+        photo = crew.kickoff(inputs=inputs)
+
+        logging.info(f"Photo generation result: {photo}")
+
+        if photo:
+            return photo  # Üretilen fotoğrafın URL'si
+        else:
+            return "Fotoğraf oluşturulamadı."
+
+    except Exception as e:
+        logging.error(f"Photo generation error: {e}")
+        return "Bir hata oluştu, fotoğraf üretimi başarısız."
+
 
 # LLM ile iletişim kurmak için Flort agent kullanımı
 async def flort_response(user_message: str) -> str:
@@ -27,16 +81,12 @@ async def flort_response(user_message: str) -> str:
             }
         }
 
-        print(f"Inputs: {inputs}")
 
         # Crew çalıştırma
-        print(f"Inputs to kickoff: {inputs}")
         result = crew.kickoff(inputs=inputs)
-        print(f"Result: {result}")
 
-        # Sonuçtan görevin çıktısını al, doğrudan result'u kullanabilirsiniz
         if result:
-            return str(result).strip()  # result zaten doğru şekilde döndürülmüşse, doğrudan kullanabilirsiniz
+            return str(result)
         else:
             return "Görev sonucu bulunamadı"
 
@@ -54,7 +104,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Mesajları işleyen işlev
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
-    print(f"kullanıcı mesajı: {user_message}")
     response = await flort_response(user_message)
 
     print(f"Telegram Response: {response}")
