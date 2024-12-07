@@ -1,0 +1,6 @@
+voice_decision_task:
+  description: >
+    Kullanıcının mesajına göre sesli yanıt gerekip gerekmediğine karar ver.
+  expected_output: >
+    {conversation_context} mesajına uygun olarak "yes" veya "no".
+  agent: voice_decision_agent

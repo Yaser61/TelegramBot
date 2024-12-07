@@ -1,0 +1,6 @@
+photo_decision_task:
+  description: >
+    Kullanıcının mesajına göre bir fotoğraf gönderilip gönderilmeyeceğine karar ver.
+  expected_output: >
+    {conversation_context} mesajına uygun olarak "yes" veya "no".
+  agent: photo_decision_agent

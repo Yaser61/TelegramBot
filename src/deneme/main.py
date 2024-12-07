@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-import sys
 import warnings
-
-from deneme.crew import Deneme, PhotoDecision, VoiceDecision, TexttoPhoto
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 

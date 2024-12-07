@@ -1,0 +1,6 @@
+text_to_speech_task:
+  description: >
+    Verilen metni sesli mesaja dönüştür.
+  expected_output: >
+    Sesli yanıtın bağlantısı veya dosya yolu.
+  agent: text_to_speech_agent

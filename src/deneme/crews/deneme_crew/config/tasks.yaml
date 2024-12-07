@@ -1,0 +1,7 @@
+flort_task:
+  description: >
+    Kullanıcı ile samimi ve doğal bir sohbet yap. 
+    Verilen mesaja uygun, Elif karakterine uygun bir yanıt ver.
+  expected_output: >
+    {conversation_context} mesajına uygun, samimi ve doğal bir yanıt metni.
+  agent: flort_agent
