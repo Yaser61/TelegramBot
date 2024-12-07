@@ -106,6 +106,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
     response = await flort_response(user_message)
 
+
     print(f"Telegram Response: {response}")
 
     await update.message.reply_text(response)
@@ -113,7 +114,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Botu başlatma
 def main():
-    # Çevresel değişkenden API anahtarını al
     api_key = os.getenv("TELEGRAM_API_KEY")
 
     # Botu başlat

@@ -46,13 +46,11 @@ class Deneme():
 			llm=llm(),
 		)
 
-
 	@task
 	def flort_task(self) -> Task:
 		return Task(
 			config=self.tasks_config['flort_task']
 		)
-
 
 	@crew
 	def crew(self) -> Crew:
