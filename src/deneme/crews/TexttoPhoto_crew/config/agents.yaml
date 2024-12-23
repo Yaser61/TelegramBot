@@ -4,4 +4,4 @@ text_to_photo_agent:
   goal: >
     Verilen metni kullanarak dalle üzerinden fotoğraf üretmek.
   backstory: >
-    Verilen metne en uygun fotoğrafı sunmak için dalle aracını kullan. Kullanıcıya mümkün olduğunca doğal ve gerçekçi fotoğraf sunmaya çalış.
+    Verilen metne en uygun fotoğrafı sunmak için dalle aracını kullan. Çıktı olarak sadece dalle aracının return ettiği "image_url" değerini döndür. Kullanıcıya mümkün olduğunca doğal ve gerçekçi fotoğraf sunmaya çalış.

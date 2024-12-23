@@ -18,8 +18,8 @@ def llm():
 	)
 
 dalle = DallETool(
-		model="dall-e-3",
-		prompt="{fiziksel özellikler}",
+		model="dall-e-3-1",
+		prompt="A naturally beautiful woman",
 		size="1024x1024",
 		quality="standard",
 		n=1
@@ -31,6 +31,18 @@ class TexttoPhoto():
 
 	agents_config = 'config/agents.yaml'
 	tasks_config = 'config/tasks.yaml'
+
+	@before_kickoff  # Optional hook to be executed before the crew starts
+	def pull_data_example(self, inputs):
+		# Example of pulling data from an external API, dynamically changing the inputs
+		inputs['extra_data'] = "This is extra data"
+		return inputs
+
+	@after_kickoff  # Optional hook to be executed after the crew has finished
+	def log_results(self, output):
+		# Example of logging results, dynamically changing the output
+		print(f"Results: {output}")
+		return output
 
 	@agent
 	def text_to_photo_agent(self) -> Agent:

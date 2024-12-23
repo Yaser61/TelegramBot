@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 import logging
 import os
+import requests
 import json
 from dotenv import load_dotenv
 
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
+from telegram.request import HTTPXRequest
 from pydantic import BaseModel
 
 from crewai.flow.flow import Flow, start, listen, router
 from deneme.crews.deneme_crew.deneme import Deneme
 from deneme.crews.PhotoDecision_crew.photo_decision import PhotoDecision
-from deneme.crews.TexttoPhoto_crew.text_to_photo import TexttoPhoto
+from deneme.crews.TexttoPhoto_crew.text_to_photo import TexttoPhoto, dalle
 
 load_dotenv()
 
@@ -22,6 +24,7 @@ class AutoResponderState(BaseModel):
     generated_photo: str = ""
     needs_photo: bool = False
     photo_decision_result: str = ""
+    physical_features: str = dalle.prompt
 
 
 class TelegramBotFlow(Flow[AutoResponderState]):
@@ -33,6 +36,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
         Entry point of the flow. Captures user message and initiates processing.
         """
         print(f"Received user message: {self.state.user_message}")
+        print(f"Başlangıç fiziksel özellikleri: {self.state.physical_features}")
 
         # Fotoğraf gereksinimini belirle
         #await self.decide_photo_need()
@@ -56,7 +60,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
 
             # Fotoğraf gerekirse generate_photo fonksiyonuna yönlendir
             if self.state.photo_decision_result.raw == "yes":
-                return "generate_photo"  # "yes" ise fotoğraf üret
+                return "generate_photo1"  # "yes" ise fotoğraf üret
             else:
                 return "generate_response1"  # Fotoğraf gerekmezse metin yanıtını oluştur
 
@@ -64,7 +68,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
             print(f"Photo decision error: {e}")
             return "Fotoğraf kararı hatası"  # Hata durumunda yine metin yanıtı
 
-    @listen("generate_photo")
+    @listen("generate_photo1")
     async def generate_photo(self):
         """
         Generate a photo based on the user's message.
@@ -73,7 +77,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
             text_to_photo_crew = TexttoPhoto().crew()
             inputs = {
                 "conversation_context": {
-                    "user_message": self.state.user_message
+                    "physical_features": self.state.physical_features
                 }
             }
 
@@ -86,7 +90,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
 
         except Exception as e:
             logging.error(f"Photo generation error: {e}")
-            return "Fotoğraf üretme hatası"  # Fotoğraf üretilemezse metin yanıtı
+            return "generate_response1"  # Fotoğraf üretilemezse metin yanıtı
 
     @listen("generate_response1")
     async def generate_response(self):
@@ -101,37 +105,54 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                 }
             }
 
-            self.state.generated_response = str(response_crew.kickoff(inputs=inputs))
-            print(f"Generated response: {self.state.generated_response}")
-
-            return self.state.generated_response  # Son olarak yanıtı döndür
+            response = response_crew.kickoff(inputs=inputs)
+            self.state.generated_response = str(response)
 
         except Exception as e:
             logging.error(f"Response generation error: {e}")
             self.state.generated_response = "Şu anda yanıt veremiyorum. Daha sonra tekrar deneyin."
-            return self.state.generated_response  # Hata durumunda genel mesaj döndür
+            return "Yanıt oluşturulamıyo" # Hata durumunda genel mesaj döndür
 
-    async def finalize_response(self):
+    #async def finalize_response(self):
 
 
-        return self.state.generated_response  # Final yanıtı döndür
+        #return self.state.generated_response  # Final yanıtı döndür
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    flow = TelegramBotFlow()
-    response = flow.kickoff(inputs={"user_message": update.message.text})
+    try:
+        flow = TelegramBotFlow()
+        await flow.kickoff_async(inputs={
+            "user_message": update.message.text,
+            "physical_features": flow.state.physical_features
+        })
+
+    except Exception as e:
+        # Hata durumunda kullanıcıya bilgi ver
+        logging.error(f"Error in flow kickoff: {e}")
+        await update.message.reply_text("Akış hatası")
+        return  # Hata durumunda işlemi sonlandırın
 
     # Fotoğraf varsa gönder
     if flow.state.generated_photo and flow.state.generated_photo != "Fotoğraf oluşturulamadı.":
-        await update.message.reply_photo(flow.state.generated_photo)
-
-    # Yanıtı gönder
-    await update.message.reply_text(response)
+        photo = requests.get(flow.state.generated_photo)
+        photo_data = photo.content
+        await update.message.reply_photo(photo_data)
+    else:
+        await update.message.reply_text(flow.state.generated_response)
 
 
 def main():
+    request = HTTPXRequest(
+        connection_pool_size=8,
+        read_timeout=60,  # 1 dakika
+        write_timeout=60,  # 1 dakika
+        connect_timeout=30,  # 30 saniye
+        pool_timeout=60  # 1 dakika
+    )
+
     api_key = os.getenv("TELEGRAM_API_KEY")
-    application = ApplicationBuilder().token(api_key).build()
+    application = ApplicationBuilder().token(api_key).request(request).build()
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     print("Bot başlatılıyor...")
