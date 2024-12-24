@@ -1,6 +1,7 @@
 text_to_speech_task:
   description: >
-    Verilen metni sesli mesaja dönüştür.
+    Kullanıcı ile samimi ve doğal bir sohbet yap. 
+    Verilen mesaja uygun, Elif karakterine uygun bir yanıt ver.
   expected_output: >
-    Sesli yanıtın bağlantısı veya dosya yolu.
+    "elevenlabs" aracını kullanarak {conversation_context} mesajına uygun, samimi ve doğal bir yanıt.
   agent: text_to_speech_agent
