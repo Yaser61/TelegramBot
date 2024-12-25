@@ -1,8 +1,10 @@
+import os
+import uuid
+from elevenlabs import VoiceSettings
+from elevenlabs.client import ElevenLabs
 from crewai.tools import BaseTool
 from typing import Type
 from pydantic import BaseModel, Field
-import os
-import requests
 from dotenv import load_dotenv
 
 
@@ -29,32 +31,49 @@ class ElevenLabsTool(BaseTool):
         if not api_key:
             raise ValueError("API key not found. Ensure ELEVENLABS_API_KEY is set in the .env file.")
 
+        # Initialize ElevenLabs client
+        client = ElevenLabs(api_key=api_key)
+
+        # Ensure tmp directory exists
+        tmp_dir = "tmp"
+        os.makedirs(tmp_dir, exist_ok=True)
+
         try:
-            # API request setup
-            url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
-            headers = {
-                "Accept": "audio/mpeg",
-                "Content-Type": "application/json",
-                "xi-api-key": api_key,
-            }
-            data = {
-                "text": prompt,
-                "voice_settings": {
-                    "stability": stability,
-                    "similarity_boost": similarity_boost,
-                },
-            }
+            # Call ElevenLabs text-to-speech API
+            response = client.text_to_speech.convert(
+                voice_id=voice_id,
+                output_format="mp3_22050_32",
+                text=prompt,
+                model_id="eleven_turbo_v2_5",  # Use turbo model for low latency
+                voice_settings=VoiceSettings(
+                    stability=stability,
+                    similarity_boost=similarity_boost,
+                ),
+            )
 
-            response = requests.post(url, json=data, headers=headers)
-            if response.status_code != 200:
-                raise RuntimeError(f"Failed to generate audio: {response.status_code} - {response.text}")
+            # Generate a unique file name in tmp directory
+            save_file_path = os.path.join(tmp_dir, f"{uuid.uuid4()}.mp3")
 
-            # Save audio file
-            file_path = "output.mp3"
-            with open(file_path, "wb") as audio_file:
-                audio_file.write(response.content)
+            # Save the audio file
+            with open(save_file_path, "wb") as f:
+                for chunk in response:
+                    if chunk:
+                        f.write(chunk)
 
-            return file_path
+            print(f"{save_file_path}: A new audio file was saved successfully!")
+
+            # Return the path of the saved audio file
+            return save_file_path
 
         except Exception as e:
             raise RuntimeError(f"Error generating audio: {str(e)}")
+
+    @staticmethod
+    def cleanup_file(file_path: str):
+        """Delete the temporary file."""
+        try:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                print(f"{file_path} was deleted successfully.")
+        except Exception as e:
+            print(f"Error deleting file {file_path}: {e}")

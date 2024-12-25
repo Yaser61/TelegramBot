@@ -7,7 +7,7 @@ from crewai_tools import DallETool
 import os
 
 def llm():
-	env_path = os.path.join(os.path.dirname(__file__), '.env')
+	env_path = r"C:\Users\trabz\Desktop\PyCharm\deneme\src\deneme\.env" #os.path.join(os.path.dirname(__file__), '.env')
 	load_dotenv(dotenv_path=env_path)
 
 	return LLM(

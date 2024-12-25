@@ -57,10 +57,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
             }
 
             self.state.photo_decision_result = photo_decision_crew.kickoff(inputs=inputs)
-            print(f"Photo decision result: {self.state.photo_decision_result}")
 
-
-            #FOTOĞRAF KARARI
             voice_decision_crew = VoiceDecision().crew()
             inputs = {
                 "conversation_context": {
@@ -69,13 +66,11 @@ class TelegramBotFlow(Flow[AutoResponderState]):
             }
 
             self.state.voice_decision_result = voice_decision_crew.kickoff(inputs=inputs)
-            print(f"Voice decision result: {self.state.voice_decision_result}")
 
-            # Fotoğraf gerekirse generate_photo fonksiyonuna yönlendir
             if self.state.photo_decision_result.raw == "yes":
-                return "generate_response_with_photo"  # "yes" ise fotoğraf üret
+                return "generate_response_with_photo"
             else:
-                return "generate_response_without_photo"  # Fotoğraf gerekmezse metin yanıtını oluştur
+                return "generate_response_without_photo"
 
         except Exception as e:
             print(f"decision error: {e}")
@@ -94,9 +89,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                 }
             }
 
-            print("Fotoğraf üretiliyor...")
             photo = text_to_photo_crew.kickoff(inputs=inputs)
-            print(f"Photo generation result: {photo}")
 
             self.state.generated_photo = photo if photo else "Fotoğraf oluşturulamadı."
 
@@ -108,11 +101,20 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                     }
                 }
 
-                response = voice_response_crew.kickoff(inputs=inputs)
-                with open(response, "rb") as audio_file:
-                    response = audio_file.read()
-                self.state.generated_response = response
-                print(f"Generated voice response: {response}")
+                response = voice_response_crew.kickoff(inputs=inputs).raw
+
+                tmp_dir = "tmp"
+                full_path = os.path.join(tmp_dir, response)
+
+                if os.path.exists(full_path):
+                    with open(full_path, "rb") as audio_file:
+                        self.state.generated_response = audio_file.read()
+                    os.remove(full_path)
+                    print(f"Temporary file {full_path} deleted.")
+                else:
+                    self.state.generated_response = None
+                    print("Ses dosyası bulunamadı.")
+
             else:
                 response_withphoto = TextWithPhoto().crew()
                 inputs = {
@@ -123,13 +125,14 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                 }
 
                 response = response_withphoto.kickoff(inputs=inputs)
-                self.state.generated_response = str(response)
+                self.state.generated_response = response.raw
 
             return "generate_response1"  # Fotoğraf üretildikten sonra metin yanıtına geç
 
         except Exception as e:
-            logging.error(f"Photo generation error: {e}")
+            logging.error(f"error: {e}")
             return "generate_response1"  # Fotoğraf üretilemezse metin yanıtı
+
 
     @listen("generate_response_without_photo")
     async def generate_response_withoutphoto(self):
@@ -146,11 +149,20 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                     }
                 }
 
-                response = voice_response_crew.kickoff(inputs=inputs)
-                with open(response, "rb") as audio_file:
-                    response = audio_file.read()
-                self.state.generated_response = response
-                print(f"Generated voice response: {response}")
+                response = voice_response_crew.kickoff(inputs=inputs).raw
+
+                tmp_dir = "tmp"
+                full_path = os.path.join(tmp_dir, response)
+
+                if os.path.exists(full_path):
+                    with open(full_path, "rb") as audio_file:
+                        self.state.generated_response = audio_file.read()
+                    # Dosyayı temizle
+                    os.remove(full_path)
+                    print(f"Temporary file {full_path} deleted.")
+                else:
+                    self.state.generated_response = None
+                    print("Ses dosyası bulunamadı.")
 
             else:
                 text_response_crew = Deneme().crew()
@@ -168,11 +180,6 @@ class TelegramBotFlow(Flow[AutoResponderState]):
             self.state.generated_response = "Şu anda yanıt veremiyorum. Daha sonra tekrar deneyin."
             return "Yanıt oluşturulamıyo" # Hata durumunda genel mesaj döndür
 
-    #async def finalize_response(self):
-
-
-        #return self.state.generated_response  # Final yanıtı döndür
-
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
@@ -183,19 +190,26 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         })
 
     except Exception as e:
-        # Hata durumunda kullanıcıya bilgi ver
         logging.error(f"Error in flow kickoff: {e}")
         await update.message.reply_text("Akış hatası")
-        return  # Hata durumunda işlemi sonlandırın
+        return
 
-    # Fotoğraf varsa gönder
     if flow.state.generated_photo and flow.state.generated_photo != "Fotoğraf oluşturulamadı.":
-        photo = requests.get(flow.state.generated_photo)
-        photo_data = photo.content
-        await update.message.reply_photo(photo_data)
-        await update.message.reply_text(flow.state.generated_response)
+        if flow.state.voice_decision_result.raw == "yes":
+            photo = requests.get(flow.state.generated_photo)
+            photo_data = photo.content
+            await update.message.reply_photo(photo_data)
+            await update.message.reply_audio(flow.state.generated_response)
+        else:
+            photo = requests.get(flow.state.generated_photo)
+            photo_data = photo.content
+            await update.message.reply_photo(photo_data)
+            await update.message.reply_text(flow.state.generated_response)
     else:
-        await update.message.reply_text(flow.state.generated_response)
+        if flow.state.voice_decision_result.raw == "yes":
+            await update.message.reply_audio(flow.state.generated_response)
+        else:
+            await update.message.reply_text(flow.state.generated_response)
 
 
 def main():
