@@ -44,7 +44,7 @@ def main():
 
     # Seçilen kullanıcı
     selected_username = usernames[selected_idx - 1]
-    print(f"\nSeçilen kullanıcı: {selected_username}")
+    print(f"\nSeçilen kullanıcı: {selected_username}") 
 
     # Sohbet geçmişini al
     chat_history = get_chat_history(redis_client, selected_username)

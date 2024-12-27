@@ -233,7 +233,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_photo(photo_data)
             await update.message.reply_text(flow.state.generated_response)
             redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response}))
-            redis_client.ltrim(redis_key, -10, -1)
+            redis_client.ltrim(redis_key, -100, -1)
     else:
         if flow.state.voice_decision_result.raw == "yes":
             await update.message.reply_audio(flow.state.generated_response)
@@ -241,7 +241,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             await update.message.reply_text(flow.state.generated_response)
             redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response}))
-            redis_client.ltrim(redis_key, -10, -1)
+            redis_client.ltrim(redis_key, -100, -1)
 
 def main():
     request = HTTPXRequest(
@@ -257,7 +257,8 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     print("Bot başlatılıyor...")
-    application.run_polling(drop_pending_updates=True)
+
+    application.run_polling(drop_pending_updates=False)
 
 
 if __name__ == "__main__":
