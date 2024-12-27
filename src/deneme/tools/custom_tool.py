@@ -34,10 +34,6 @@ class ElevenLabsTool(BaseTool):
         # Initialize ElevenLabs client
         client = ElevenLabs(api_key=api_key)
 
-        # Ensure tmp directory exists
-        tmp_dir = "tmp"
-        os.makedirs(tmp_dir, exist_ok=True)
-
         try:
             # Call ElevenLabs text-to-speech API
             response = client.text_to_speech.convert(
@@ -52,7 +48,7 @@ class ElevenLabsTool(BaseTool):
             )
 
             # Generate a unique file name in tmp directory
-            save_file_path = os.path.join(tmp_dir, f"{uuid.uuid4()}.mp3")
+            save_file_path = os.path.join("tmp", f"{uuid.uuid4()}.mp3")
 
             # Save the audio file
             with open(save_file_path, "wb") as f:

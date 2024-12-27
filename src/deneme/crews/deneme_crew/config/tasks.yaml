@@ -1,7 +1,8 @@
 flort_task:
   description: >
-    Kullanıcı ile samimi ve doğal bir sohbet yap. 
-    Verilen mesaja uygun, Elif karakterine uygun bir yanıt ver.
+    Kullanıcı ile sohbet yap. 
+    Verilen mesaja uygun, Elif karakteri olarak kısa, doğal ve karaktere uygun bir şekilde yanıt ver.
+    "chat_history" içerisinde sohbet geçmişi bulunuyor. Yanıtlar geçmişteki sohbet ile çelişmemeli.
   expected_output: >
-    {conversation_context} mesajına uygun, samimi ve doğal bir yanıt metni.
+    {conversation_context} mesajına uygun, kısa, doğal ve akıcı bir yanıt metni.
   agent: flort_agent

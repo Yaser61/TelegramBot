@@ -14,16 +14,20 @@ from crewai.flow.flow import Flow, start, listen, router
 
 from deneme.crews.TexttoSpeech_crew.text_to_speech import TexttoSpeech
 from deneme.crews.VoiceDecision_crew.voice_decision import VoiceDecision
+from deneme.crews.VoiceWithPhoto_crew.voice_with_photo import VoiceWithPhoto
 from deneme.crews.deneme_crew.deneme import Deneme
 from deneme.crews.PhotoDecision_crew.photo_decision import PhotoDecision
 from deneme.crews.TexttoPhoto_crew.text_to_photo import TexttoPhoto, dalle
 from deneme.crews.TextWithPhoto_crew.text_with_photo import TextWithPhoto
+
+from db.redis_connection import RedisConnection
 
 load_dotenv()
 
 
 class AutoResponderState(BaseModel):
     user_message: str = ""
+    chat_history: list = ()
     generated_response: str = ""
     generated_photo: str = ""
     needs_photo: bool = False
@@ -42,6 +46,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
         """
         print(f"Received user message: {self.state.user_message}")
         print(f"Başlangıç fiziksel özellikleri: {self.state.physical_features}")
+        print(f"Başlangıç chat geçmişi: {self.state.chat_history}")
 
     @router(start_flow)
     async def decides(self):
@@ -94,10 +99,12 @@ class TelegramBotFlow(Flow[AutoResponderState]):
             self.state.generated_photo = photo if photo else "Fotoğraf oluşturulamadı."
 
             if self.state.voice_decision_result.raw == "yes":
-                voice_response_crew = TexttoSpeech().crew()
+                voice_response_crew = VoiceWithPhoto().crew()
                 inputs = {
                     "conversation_context": {
-                        "user_message": self.state.user_message
+                        "chat_history": self.state.chat_history,
+                        "user_message": self.state.user_message,
+                        "physical_features": self.state.physical_features
                     }
                 }
 
@@ -120,6 +127,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                 inputs = {
                     "conversation_context": {
                         "user_message": self.state.user_message,
+                        "chat_history": self.state.chat_history,
                         "physical_features": self.state.physical_features
                     }
                 }
@@ -145,7 +153,8 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                 voice_response_crew = TexttoSpeech().crew()
                 inputs = {
                     "conversation_context": {
-                        "user_message": self.state.user_message
+                        "user_message": self.state.user_message,
+                        "chat_history": self.state.chat_history
                     }
                 }
 
@@ -157,7 +166,6 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                 if os.path.exists(full_path):
                     with open(full_path, "rb") as audio_file:
                         self.state.generated_response = audio_file.read()
-                    # Dosyayı temizle
                     os.remove(full_path)
                     print(f"Temporary file {full_path} deleted.")
                 else:
@@ -169,6 +177,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                 inputs = {
                     "conversation_context": {
                         "user_message": self.state.user_message,
+                        "chat_history": self.state.chat_history
                     }
                 }
 
@@ -183,11 +192,28 @@ class TelegramBotFlow(Flow[AutoResponderState]):
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
+        user_id = update.message.chat_id
+        username = update.message.chat.first_name
+        user_message = update.message.text
+
+        redis_client = RedisConnection().get_client()
+
+        redis_key = f"user:{user_id}:chat_history"
+
+        chat_history_raw = redis_client.lrange(redis_key, 0, -1)
+        chat_history = [json.loads(message) for message in chat_history_raw]
+
+        chat_history.append({"sender": username, "message": user_message})
+        redis_client.rpush(redis_key, json.dumps({"sender": username, "message": user_message}))
+
         flow = TelegramBotFlow()
         await flow.kickoff_async(inputs={
             "user_message": update.message.text,
+            "chat_history": chat_history,
             "physical_features": flow.state.physical_features
         })
+
+        print(chat_history)
 
     except Exception as e:
         logging.error(f"Error in flow kickoff: {e}")
@@ -200,25 +226,30 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             photo_data = photo.content
             await update.message.reply_photo(photo_data)
             await update.message.reply_audio(flow.state.generated_response)
+            #redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response})) ses dosyası olduğu için yorum satırına alındı
         else:
             photo = requests.get(flow.state.generated_photo)
             photo_data = photo.content
             await update.message.reply_photo(photo_data)
             await update.message.reply_text(flow.state.generated_response)
+            redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response}))
+            redis_client.ltrim(redis_key, -10, -1)
     else:
         if flow.state.voice_decision_result.raw == "yes":
             await update.message.reply_audio(flow.state.generated_response)
+            #redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response})) ses dosyası olduğu için yorum satırına alındı
         else:
             await update.message.reply_text(flow.state.generated_response)
-
+            redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response}))
+            redis_client.ltrim(redis_key, -10, -1)
 
 def main():
     request = HTTPXRequest(
         connection_pool_size=8,
-        read_timeout=60,  # 1 dakika
-        write_timeout=60,  # 1 dakika
-        connect_timeout=30,  # 30 saniye
-        pool_timeout=60  # 1 dakika
+        read_timeout=120,  # 1 dakika
+        write_timeout=120,  # 1 dakika
+        connect_timeout=60,  # 30 saniye
+        pool_timeout=120  # 1 dakika
     )
 
     api_key = os.getenv("TELEGRAM_API_KEY")

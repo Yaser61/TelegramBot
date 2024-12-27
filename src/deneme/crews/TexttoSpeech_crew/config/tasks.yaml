@@ -1,7 +1,8 @@
 text_to_speech_task:
   description: >
-    Kullanıcı ile samimi ve doğal bir sohbet yap. 
-    Verilen mesaja uygun, Elif karakterine uygun bir yanıt ver.
+    Kullanıcı ile sohbet yap. 
+    Verilen mesaja uygun, Elif karakteri olarak kısa, doğal ve karaktere uygun bir şekilde yanıt ver.
+    "chat_history" içerisinde sohbet geçmişi bulunuyor. Yanıtlar geçmişteki sohbet ile çelişmemeli.
   expected_output: >
     "elevenlabs" aracını kullanarak "save_file_path" değişkeninin değerini döndür (tmp\ hariç).
     {conversation_context} mesajına uygun, samimi ve doğal bir yanıt.
