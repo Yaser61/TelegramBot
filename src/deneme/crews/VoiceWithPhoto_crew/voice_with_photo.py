@@ -1,12 +1,15 @@
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task, before_kickoff, after_kickoff
 from dotenv import load_dotenv
-from deneme.tools.custom_tool import ElevenLabsTool
+from deneme.tools.elevenlabs_tool import ElevenLabsTool
 import os
 
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')
+load_dotenv(dotenv_path=env_path)
+
 def llm():
-	env_path = os.path.join(os.path.dirname(__file__), '.env')
-	load_dotenv(dotenv_path=env_path)
+	#env_path = os.path.join(os.path.dirname(__file__), '.env')
+	#load_dotenv(dotenv_path=env_path)
 
 	return LLM(
 		model=os.environ.get("AZURE_API_MODEL"),
@@ -14,26 +17,26 @@ def llm():
 		base_url=os.environ.get("AZURE_API_BASE"),  # example: https://example.openai.azure.com/
 		api_version=os.environ.get("AZURE_API_VERSION"),  # example: 2024-08-01-preview
 	)
-# Todo: .env altına al.
+
 elevenlabs = ElevenLabsTool(
-		prompt="Naber",
-        voice_id="KbaseEXyT9EE0CQLEfbB",
-		model_id="eleven_multilingual_v2",
-        stability=0.7,
-        similarity_boost=0.8,
-    )
+	prompt="Naber",
+	voice_id=os.environ.get("ELEVENLABS_VOICE_ID"),
+	model_id=os.environ.get("ELEVENLABS_MODEL_ID"),
+	stability=0.7,
+	similarity_boost=0.8,
+)
 
 @CrewBase
 class VoiceWithPhoto():
 	""" crew"""
 
-	agents_config = 'config/agents.yaml'
+	agents_config = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'CommonConfig/agents.yaml')
 	tasks_config = 'config/tasks.yaml'
 
 	@agent
-	def flort_agent_withphoto(self) -> Agent:
+	def common_elif(self) -> Agent:
 		return Agent(
-			config=self.agents_config['flort_agent_withphoto'],
+			config=self.agents_config['common_elif'],
 			llm=llm(),
 			tools=[elevenlabs]
 		)

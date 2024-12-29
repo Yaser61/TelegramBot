@@ -15,7 +15,7 @@ from crewai.flow.flow import Flow, start, listen, router
 from deneme.crews.TexttoSpeech_crew.text_to_speech import TexttoSpeech
 from deneme.crews.VoiceDecision_crew.voice_decision import VoiceDecision
 from deneme.crews.VoiceWithPhoto_crew.voice_with_photo import VoiceWithPhoto
-from deneme.crews.deneme_crew.deneme import Deneme
+from deneme.crews.TextResponse_crew.text_response import TextResponse
 from deneme.crews.PhotoDecision_crew.photo_decision import PhotoDecision
 from deneme.crews.TexttoPhoto_crew.text_to_photo import TexttoPhoto, dalle
 from deneme.crews.TextWithPhoto_crew.text_with_photo import TextWithPhoto
@@ -23,9 +23,6 @@ from deneme.crews.TextWithPhoto_crew.text_with_photo import TextWithPhoto
 from db.redis_connection import RedisConnection
 
 load_dotenv()
-
-# Todo: Yorum satırlarını kaldır, türkçe yorumları ingilizce yaz.  flow yap ismini, flow2 ye gerek yok.
-
 
 class AutoResponderState(BaseModel):
     user_message: str = ""
@@ -136,17 +133,17 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                 response = response_withphoto.kickoff(inputs=inputs)
                 self.state.generated_response = response.raw
 
-            return "generate_response1"  # Fotoğraf üretildikten sonra metin yanıtına geç
+            return "generate_response1"
 
         except Exception as e:
             logging.error(f"error: {e}")
-            return "generate_response1"  # Fotoğraf üretilemezse metin yanıtı
+            return "generate_response1"
 
 
     @listen("generate_response_without_photo")
     async def generate_response_withoutphoto(self):
         """
-        Generate a text response using the Deneme crew.
+        Generate a text response using the TextResponse crew.
         """
         try:
 
@@ -174,7 +171,7 @@ class TelegramBotFlow(Flow[AutoResponderState]):
                     print("Ses dosyası bulunamadı.")
 
             else:
-                text_response_crew = Deneme().crew()
+                text_response_crew = TextResponse().crew()
                 inputs = {
                     "conversation_context": {
                         "user_message": self.state.user_message,
@@ -214,7 +211,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "physical_features": flow.state.physical_features
         })
 
-        print(user_message)
+        print(username, user_message)
 
     except Exception as e:
         logging.error(f"Error in flow kickoff: {e}")
@@ -227,7 +224,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             photo_data = photo.content
             await update.message.reply_photo(photo_data)
             await update.message.reply_audio(flow.state.generated_response)
-            #redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response})) ses dosyası olduğu için yorum satırına alındı
+            #redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response}))
         else:
             photo = requests.get(flow.state.generated_photo)
             photo_data = photo.content

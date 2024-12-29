@@ -7,4 +7,4 @@ flort_task_withphoto:
     ("physical_features" metni fotoğraf üretimi için kullanılan prompt.)
   expected_output: >
     {conversation_context} içerisindeki "user_message" mesajına uygun bir fotoğraf yollandı. "physical_features" metni fotoğraf üretimi için kullanılan prompt.
-  agent: flort_agent_withphoto
+  agent: common_elif

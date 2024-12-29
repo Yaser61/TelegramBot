@@ -7,8 +7,6 @@ from typing import Type
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-# Todo: bu dosya elevan labs için olduğu için adını ona göre convert et.
-
 class ElevenLabsToolInput(BaseModel):
     """Input schema for ElevenLabs Tool."""
     prompt: str = Field(..., description="Text to be converted into audio.")

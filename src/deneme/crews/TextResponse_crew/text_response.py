@@ -1,5 +1,5 @@
 from crewai import Agent, Crew, Process, Task, LLM
-from crewai.project import CrewBase, agent, crew, task
+from crewai.project import CrewBase, agent, crew, task, before_kickoff, after_kickoff
 from dotenv import load_dotenv
 import os
 
@@ -15,10 +15,11 @@ def llm():
 	)
 
 @CrewBase
-class TextWithPhoto():
-	""" crew"""
+class TextResponse():
+	"""Text Response crew"""
 
 	agents_config = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'CommonConfig/agents.yaml')
+	#agents_config = 'config/agents.yaml'
 	tasks_config = 'config/tasks.yaml'
 
 	@agent
@@ -29,9 +30,9 @@ class TextWithPhoto():
 		)
 
 	@task
-	def flort_task_withphoto(self) -> Task:
+	def flort_task(self) -> Task:
 		return Task(
-			config=self.tasks_config['flort_task_withphoto']
+			config=self.tasks_config['flort_task']
 		)
 
 	@crew

@@ -3,8 +3,7 @@ text_to_speech_task:
     Kullanıcı ile sohbet yap. 
     Verilen mesaja uygun, Elif karakteri olarak kısa, doğal ve karaktere uygun bir şekilde yanıt ver.
     "chat_history" içerisinde sohbet geçmişi bulunuyor. Yanıtlar geçmişteki sohbet ile çelişmemeli.
-# Todo: expected_output kısmında tmp hariç vs. tanımlamak gerekiyor mu response u mu ai a gönderip temizletiyorsun anlamadım?
   expected_output: >
     "elevenlabs" aracını kullanarak "save_file_path" değişkeninin değerini döndür (tmp\ hariç).
     {conversation_context} mesajına uygun, samimi ve doğal bir yanıt.
-  agent: text_to_speech_agent
+  agent: common_elif

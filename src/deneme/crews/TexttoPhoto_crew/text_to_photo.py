@@ -6,10 +6,12 @@ from dotenv import load_dotenv
 from crewai_tools import DallETool
 import os
 
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')
+load_dotenv(dotenv_path=env_path)
+
 def llm():
-	# Todo: env path böyle olmaz, diğerleri gibi olmalı.
-	env_path = r"C:\Users\trabz\Desktop\PyCharm\deneme\src\deneme\.env" #os.path.join(os.path.dirname(__file__), '.env')
-	load_dotenv(dotenv_path=env_path)
+	#env_path = os.path.join(os.path.dirname(__file__), '.env')
+	#load_dotenv(dotenv_path=env_path)
 
 	return LLM(
 		model=os.environ.get("AZURE_API_MODEL"),
@@ -17,39 +19,26 @@ def llm():
 		base_url=os.environ.get("AZURE_API_BASE"),  # example: https://example.openai.azure.com/
 		api_version=os.environ.get("AZURE_API_VERSION"),  # example: 2024-08-01-preview
 	)
-# Todo: model adını vs. .env den çek. prompt u yaml dan çek yada agent ve task birleşimi gönder. basic prompt olduğu için fotoğraflar farklı geliyor karakteri olmuyor olabilir.
+
 dalle = DallETool(
-		model="dall-e-3-1",
+		model=os.environ.get("DALLE_MODEL"),
 		prompt="A naturally beautiful woman",
-		size="1024x1024",
-		quality="standard",
+		size=os.environ.get("SIZE"),
+		quality=os.environ.get("QUALITY"),
 		n=1
-		)
+	)
 
 @CrewBase
 class TexttoPhoto():
 	"""TTP crew"""
-
-	agents_config = 'config/agents.yaml'
+	agents_config = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'CommonConfig/agents.yaml')
+	#agents_config = 'config/agents.yaml'
 	tasks_config = 'config/tasks.yaml'
 
-	@before_kickoff  # Optional hook to be executed before the crew starts
-	def pull_data_example(self, inputs):
-		# Todo: bu alanlar kullanılmıyor kaldır.
-		# Example of pulling data from an external API, dynamically changing the inputs
-		inputs['extra_data'] = "This is extra data"
-		return inputs
-
-	@after_kickoff  # Optional hook to be executed after the crew has finished
-	def log_results(self, output):
-		# Example of logging results, dynamically changing the output
-		print(f"Results: {output}")
-		return output
-
 	@agent
-	def text_to_photo_agent(self) -> Agent:
+	def common_elif(self) -> Agent:
 		return Agent(
-			config=self.agents_config['text_to_photo_agent'],
+			config=self.agents_config['common_elif'],
 			llm=llm(),
 			tools=[dalle]
 		)

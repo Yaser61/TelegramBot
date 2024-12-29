@@ -5,4 +5,4 @@ flort_task:
     "chat_history" içerisinde sohbet geçmişi bulunuyor. Yanıtlar geçmişteki sohbet ile çelişmemeli.
   expected_output: >
     {conversation_context} mesajına uygun, kısa, doğal ve akıcı bir yanıt metni.
-  agent: flort_agent
+  agent: common_elif

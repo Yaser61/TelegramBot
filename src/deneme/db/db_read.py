@@ -1,69 +1,60 @@
 import json
 from redis_connection import RedisConnection
 
-# Todo: Akışı ve yorumları ingilizce yap. Kullanıcıya response dönüyorsan onları sadece yaz. Onları da dil dosyası oluşturup oradan alabilirsin.
-
 def list_usernames(redis_client):
     """
-    Redis'te kayıtlı kullanıcı anahtarlarını al ve kullanıcı adlarını listele.
+    Get user keys stored in Redis and list usernames.
     """
-    keys = redis_client.keys("user:*:chat_history")  # Tüm kullanıcı sohbet geçmişi anahtarlarını al
+    keys = redis_client.keys("user:*:chat_history")  # Get all user chat history keys
     usernames = []
     for key in keys:
         user_id = key.split(":")[1]
         firstname_key = f"user:{user_id}:firstname"
         firstname = redis_client.get(firstname_key)
-        usernames.append((user_id, firstname.decode('utf-8') if firstname else "Bilinmiyor"))
+        usernames.append((user_id, firstname.decode('utf-8') if firstname else "unknown"))
     return usernames
 
 def get_chat_history(redis_client, username):
-    """
-    Belirtilen kullanıcı adının sohbet geçmişini al.
-    """
-    redis_key = f"user:{username}:chat_history"  # Kullanıcının sohbet geçmişi anahtarı
-    messages = redis_client.lrange(redis_key, 0, -1)  # Sohbet geçmişini getir
-    return [json.loads(message) for message in messages]  # JSON formatında parse et
+    redis_key = f"user:{username}:chat_history"
+    messages = redis_client.lrange(redis_key, 0, -1)
+    return [json.loads(message) for message in messages]
 
 def main():
-    # Redis bağlantısını al
     redis_client = RedisConnection().get_client()
 
-    # Kullanıcı adlarını listele
     usernames = list_usernames(redis_client)
 
     if not usernames:
-        print("Hiçbir kullanıcı bulunamadı.")
+        print("No users found.")
         return
 
-    print("Kayıtlı kullanıcılar:")
+    print("Registered users:")
     for idx, (username, firstname) in enumerate(usernames, start=1):
         print(f"{idx}. {username} ({firstname})")
 
-    # Kullanıcı seçimi
+    # User choice
     try:
         selected_idx = int(input("\nBir kullanıcı seçin (numarasını girin): "))
         if selected_idx < 1 or selected_idx > len(usernames):
-            print("Geçersiz seçim!")
+            print("invalid selection!")
             return
     except ValueError:
-        print("Lütfen geçerli bir sayı girin!")
+        print("Please enter a valid number!")
         return
 
-    # Seçilen kullanıcı
     selected_username = usernames[selected_idx - 1][0]
-    print(f"\nSeçilen kullanıcı: {selected_username}")
+    print(f"\nSelected user: {selected_username}")
 
-    # Sohbet geçmişini al
     chat_history = get_chat_history(redis_client, selected_username)
 
-    print("\nSohbet geçmişi:")
+    print("\nchat history:")
     if chat_history:
         for entry in chat_history:
             sender = entry.get("sender", "Bilinmiyor")
             message = entry.get("message", "Mesaj yok")
             print(f"{sender}: {message}")
     else:
-        print("Bu kullanıcının sohbet geçmişi yok.")
+        print("This user has no chat history.")
 
 if __name__ == "__main__":
     main()
