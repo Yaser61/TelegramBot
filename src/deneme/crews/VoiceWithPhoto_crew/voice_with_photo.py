@@ -14,7 +14,7 @@ def llm():
 		base_url=os.environ.get("AZURE_API_BASE"),  # example: https://example.openai.azure.com/
 		api_version=os.environ.get("AZURE_API_VERSION"),  # example: 2024-08-01-preview
 	)
-
+# Todo: .env altına al.
 elevenlabs = ElevenLabsTool(
 		prompt="Naber",
         voice_id="KbaseEXyT9EE0CQLEfbB",

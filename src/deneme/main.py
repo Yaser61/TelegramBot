@@ -8,6 +8,8 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # Replace with inputs you want to test with, it will automatically
 # interpolate any tasks and agents information
 
+# Todo: bunu kullanmıyorsak sil.
+
 def run():
     """
     Run the crew.

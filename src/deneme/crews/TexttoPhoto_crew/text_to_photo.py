@@ -7,6 +7,7 @@ from crewai_tools import DallETool
 import os
 
 def llm():
+	# Todo: env path böyle olmaz, diğerleri gibi olmalı.
 	env_path = r"C:\Users\trabz\Desktop\PyCharm\deneme\src\deneme\.env" #os.path.join(os.path.dirname(__file__), '.env')
 	load_dotenv(dotenv_path=env_path)
 
@@ -16,7 +17,7 @@ def llm():
 		base_url=os.environ.get("AZURE_API_BASE"),  # example: https://example.openai.azure.com/
 		api_version=os.environ.get("AZURE_API_VERSION"),  # example: 2024-08-01-preview
 	)
-
+# Todo: model adını vs. .env den çek. prompt u yaml dan çek yada agent ve task birleşimi gönder. basic prompt olduğu için fotoğraflar farklı geliyor karakteri olmuyor olabilir.
 dalle = DallETool(
 		model="dall-e-3-1",
 		prompt="A naturally beautiful woman",
@@ -34,6 +35,7 @@ class TexttoPhoto():
 
 	@before_kickoff  # Optional hook to be executed before the crew starts
 	def pull_data_example(self, inputs):
+		# Todo: bu alanlar kullanılmıyor kaldır.
 		# Example of pulling data from an external API, dynamically changing the inputs
 		inputs['extra_data'] = "This is extra data"
 		return inputs

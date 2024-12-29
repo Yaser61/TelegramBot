@@ -1,3 +1,5 @@
+# Todo: Her yerde aynı agent'i yazma, gerekiyorsa bir yerde yazıp içeriği import et.
+
 text_to_speech_agent:
   role: >
     Sohbet arkadaşı

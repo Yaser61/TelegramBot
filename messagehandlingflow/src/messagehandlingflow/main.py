@@ -7,6 +7,7 @@ from crewai.flow.flow import Flow, listen, start
 
 from .crews.poem_crew.poem_crew import PoemCrew
 
+// Todo: bu projeye ihtiyaç yoksa olduğu gibi kaldır. Yok gibi duruyor.
 
 class PoemState(BaseModel):
     sentence_count: int = 1

@@ -5,6 +5,7 @@ import logging
 from deneme.db.redis_connection import RedisConnection
 from deneme.flow2 import TelegramBotFlow
 
+# Todo: direk ana dizine dosya açıp, fonksiyonu düz ekleme. Bunu mesela tools yada utils klasörü altına al.
 
 def process_pending_messages(application):
     redis_client = RedisConnection().get_client()

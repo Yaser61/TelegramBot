@@ -24,6 +24,8 @@ from db.redis_connection import RedisConnection
 
 load_dotenv()
 
+# Todo: Yorum satırlarını kaldır, türkçe yorumları ingilizce yaz.  flow yap ismini, flow2 ye gerek yok.
+
 
 class AutoResponderState(BaseModel):
     user_message: str = ""

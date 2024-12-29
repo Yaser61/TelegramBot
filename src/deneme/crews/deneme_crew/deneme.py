@@ -29,8 +29,11 @@ class Deneme():
 	agents_config = 'config/agents.yaml'
 	tasks_config = 'config/tasks.yaml'
 
+	// Todo: Kullanılmayan pull_data_example vs. alanları kaldır. Ayrıca crew adını değiştir diğerleriyle uyumlu yap. Birde hepsini underscore formatında isimlendir. Örneğin: "photo_decision_crew" gibi.
+
 	@before_kickoff # Optional hook to be executed before the crew starts
 	def pull_data_example(self, inputs):
+		# Todo: bu alanlar kullanılmıyor kaldır.
 		# Example of pulling data from an external API, dynamically changing the inputs
 		inputs['extra_data'] = "This is extra data"
 		return inputs

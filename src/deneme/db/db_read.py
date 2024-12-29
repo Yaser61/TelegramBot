@@ -1,6 +1,8 @@
 import json
 from redis_connection import RedisConnection
 
+# Todo: Akışı ve yorumları ingilizce yap. Kullanıcıya response dönüyorsan onları sadece yaz. Onları da dil dosyası oluşturup oradan alabilirsin.
+
 def list_usernames(redis_client):
     """
     Redis'te kayıtlı kullanıcı anahtarlarını al ve kullanıcı adlarını listele.

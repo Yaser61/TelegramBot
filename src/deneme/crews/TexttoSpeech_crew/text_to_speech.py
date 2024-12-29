@@ -15,6 +15,7 @@ def llm():
 		api_version=os.environ.get("AZURE_API_VERSION"),  # example: 2024-08-01-preview
 	)
 
+# Todo: .env altına değişkenleri.
 elevenlabs = ElevenLabsTool(
 		prompt="Naber",
         voice_id="KbaseEXyT9EE0CQLEfbB",
