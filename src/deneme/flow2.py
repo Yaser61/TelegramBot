@@ -46,7 +46,6 @@ class TelegramBotFlow(Flow[AutoResponderState]):
         """
         print(f"Received user message: {self.state.user_message}")
         print(f"Başlangıç fiziksel özellikleri: {self.state.physical_features}")
-        print(f"Başlangıç chat geçmişi: {self.state.chat_history}")
 
     @router(start_flow)
     async def decides(self):
@@ -213,7 +212,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "physical_features": flow.state.physical_features
         })
 
-        print(chat_history)
+        print(user_message)
 
     except Exception as e:
         logging.error(f"Error in flow kickoff: {e}")
