@@ -14,7 +14,6 @@ def llm():
 		api_version=os.environ.get("AZURE_API_VERSION"),  # example: 2024-08-01-preview
 	)
 
-
 @CrewBase
 class PhotoDecision():
 	"""Photo Decision crew"""

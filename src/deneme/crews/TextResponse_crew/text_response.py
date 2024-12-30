@@ -19,7 +19,6 @@ class TextResponse():
 	"""Text Response crew"""
 
 	agents_config = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'CommonConfig/agents.yaml')
-	#agents_config = 'config/agents.yaml'
 	tasks_config = 'config/tasks.yaml'
 
 	@agent

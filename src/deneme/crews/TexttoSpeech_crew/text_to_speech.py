@@ -8,9 +8,6 @@ env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__
 load_dotenv(dotenv_path=env_path)
 
 def llm():
-	#env_path = os.path.join(os.path.dirname(__file__), '.env')
-	#load_dotenv(dotenv_path=env_path)
-
 	return LLM(
 		model=os.environ.get("AZURE_API_MODEL"),
 		api_key=os.environ.get("AZURE_API_KEY"),  # Replace with KEY1 or KEY2
@@ -18,9 +15,7 @@ def llm():
 		api_version=os.environ.get("AZURE_API_VERSION"),  # example: 2024-08-01-preview
 	)
 
-# TODO: Naber? Bu gerekmiyorsa sil. Diğer üstteki #env_path ve agents_config gibi gereksiz yorum satırlarını da sil.
 elevenlabs = ElevenLabsTool(
-	prompt="Naber",
 	voice_id=os.environ.get("ELEVENLABS_VOICE_ID"),
 	model_id=os.environ.get("ELEVENLABS_MODEL_ID"),
 	stability=0.7,

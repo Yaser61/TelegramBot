@@ -16,8 +16,7 @@ def llm():
 
 @CrewBase
 class TextWithPhoto():
-	""" crew"""
-
+	"""Text with crew"""
 	agents_config = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'CommonConfig/agents.yaml')
 	tasks_config = 'config/tasks.yaml'
 

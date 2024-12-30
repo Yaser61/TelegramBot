@@ -1,5 +1,5 @@
 from crewai import Agent, Crew, Process, Task, LLM
-from crewai.project import CrewBase, agent, crew, task, before_kickoff, after_kickoff
+from crewai.project import CrewBase, agent, crew, task
 from dotenv import load_dotenv
 from deneme.tools.elevenlabs_tool import ElevenLabsTool
 import os
@@ -8,9 +8,6 @@ env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__
 load_dotenv(dotenv_path=env_path)
 
 def llm():
-	#env_path = os.path.join(os.path.dirname(__file__), '.env')
-	#load_dotenv(dotenv_path=env_path)
-
 	return LLM(
 		model=os.environ.get("AZURE_API_MODEL"),
 		api_key=os.environ.get("AZURE_API_KEY"),  # Replace with KEY1 or KEY2
@@ -19,7 +16,6 @@ def llm():
 	)
 
 elevenlabs = ElevenLabsTool(
-	prompt="Naber",
 	voice_id=os.environ.get("ELEVENLABS_VOICE_ID"),
 	model_id=os.environ.get("ELEVENLABS_MODEL_ID"),
 	stability=0.7,
@@ -28,8 +24,7 @@ elevenlabs = ElevenLabsTool(
 
 @CrewBase
 class VoiceWithPhoto():
-	""" crew"""
-
+	"""Voice with crew"""
 	agents_config = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'CommonConfig/agents.yaml')
 	tasks_config = 'config/tasks.yaml'
 

@@ -211,7 +211,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "physical_features": flow.state.physical_features
         })
 
-        print(username, user_message)
+        print(f"{username}:, {user_message}")
 
     except Exception as e:
         logging.error(f"Error in flow kickoff: {e}")
@@ -224,7 +224,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             photo_data = photo.content
             await update.message.reply_photo(photo_data)
             await update.message.reply_audio(flow.state.generated_response)
-            #redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response}))
         else:
             photo = requests.get(flow.state.generated_photo)
             photo_data = photo.content
@@ -235,7 +234,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         if flow.state.voice_decision_result.raw == "yes":
             await update.message.reply_audio(flow.state.generated_response)
-            #redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response})) ses dosyası olduğu için yorum satırına alındı
         else:
             await update.message.reply_text(flow.state.generated_response)
             redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response}))
