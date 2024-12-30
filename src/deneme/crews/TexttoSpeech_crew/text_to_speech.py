@@ -18,6 +18,7 @@ def llm():
 		api_version=os.environ.get("AZURE_API_VERSION"),  # example: 2024-08-01-preview
 	)
 
+# TODO: Naber? Bu gerekmiyorsa sil. Diğer üstteki #env_path ve agents_config gibi gereksiz yorum satırlarını da sil.
 elevenlabs = ElevenLabsTool(
 	prompt="Naber",
 	voice_id=os.environ.get("ELEVENLABS_VOICE_ID"),
