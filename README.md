@@ -1,54 +1,52 @@
-# Deneme Crew
+# Telegram Bot
 
-Welcome to the Deneme Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+This project is a Telegram bot that processes user messages and generates responses based on the content of the messages. The bot can generate text, photo, and voice responses.
+
+## Features
+
+- **Message Handling**: Receives and processes user messages.
+- **Decision Making**: Determines whether a photo or voice response is needed based on the user's message.
+- **Response Generation**: Generates appropriate responses (text, photo, voice) and sends them to the user.
 
 ## Installation
 
-Ensure you have Python >=3.10 <=3.13 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling, offering a seamless setup and execution experience.
+1. Clone the repository:
+    ```sh
+    git clone <repository-url>
+    cd <repository-directory>
+    ```
 
-First, if you haven't already, install uv:
+2. Install the required dependencies:
+    ```sh
+    pip install -r requirements.txt
+    ```
 
-```bash
-pip install uv
-```
+3. Set up environment variables:
 
-Next, navigate to your project directory and install the dependencies:
+## Usage
 
-(Optional) Lock the dependencies and install them by using the CLI command:
-```bash
-crewai install
-```
-### Customizing
+1. Run the bot:
+    ```sh
+    python flow.py
+    ```
 
-**Add your `OPENAI_API_KEY` into the `.env` file**
+2. The bot will start and listen for incoming messages.
 
-- Modify `src/deneme/config/agents.yaml` to define your agents
-- Modify `src/deneme/config/tasks.yaml` to define your tasks
-- Modify `src/deneme/crew.py` to add your own logic, tools and specific args
-- Modify `src/deneme/main.py` to add custom inputs for your agents and tasks
+## Code Overview
 
-## Running the Project
+### `flow.py`
 
-To kickstart your crew of AI agents and begin task execution, run this from the root folder of your project:
+- **`handle_message`**: Handles incoming messages, updates chat history, and initiates the flow.
+- **`TelegramBotFlow`**: Manages the flow of the bot, including decision making and response generation.
+  - **`decides`**: Determines if a photo or voice response is needed.
+  - **`generate_response_withphoto`**: Generates a response with a photo.
+  - **`generate_response_withoutphoto`**: Generates a response without a photo.
 
-```bash
-$ crewai run
-```
 
-This command initializes the deneme Crew, assembling the agents and assigning them tasks as defined in your configuration.
+## Contributing
 
-This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
+Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
-## Understanding Your Crew
+## License
 
-The deneme Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
-
-## Support
-
-For support, questions, or feedback regarding the Deneme Crew or crewAI.
-- Visit our [documentation](https://docs.crewai.com)
-- Reach out to us through our [GitHub repository](https://github.com/joaomdmoura/crewai)
-- [Join our Discord](https://discord.com/invite/X4JWnZnxPb)
-- [Chat with our docs](https://chatg.pt/DWjSBZn)
-
-Let's create wonders together with the power and simplicity of crewAI.
+This project is licensed under the MIT License.
