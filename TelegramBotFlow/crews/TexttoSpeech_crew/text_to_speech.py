@@ -1,7 +1,7 @@
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 from dotenv import load_dotenv
-from deneme.tools.elevenlabs_tool import ElevenLabsTool
+from TelegramBot.TelegramBotFlow.tools.elevenlabs_tool import ElevenLabsTool
 import os
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')
@@ -23,8 +23,8 @@ elevenlabs = ElevenLabsTool(
 )
 
 @CrewBase
-class VoiceWithPhoto():
-	"""Voice with crew"""
+class TexttoSpeech():
+	"""TTS crew"""
 	agents_config = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'CommonConfig/agents.yaml')
 	tasks_config = 'config/tasks.yaml'
 
@@ -37,17 +37,17 @@ class VoiceWithPhoto():
 		)
 
 	@task
-	def flort_task_withphoto(self) -> Task:
+	def text_to_speech_task(self) -> Task:
 		return Task(
-			config=self.tasks_config['flort_task_withphoto']
+			config=self.tasks_config['text_to_speech_task']
 		)
 
 	@crew
 	def crew(self) -> Crew:
-		"""Creates the Deneme crew"""
 		return Crew(
-			agents=self.agents, # Automatically created by the @agent decorator
-			tasks=self.tasks, # Automatically created by the @task decorator
+			agents=self.agents,  # Automatically created by the @agent decorator
+			tasks=self.tasks,  # Automatically created by the @task decorator
 			process=Process.sequential,
 			verbose=True,
-		)
+
+	)

@@ -12,13 +12,13 @@ from pydantic import BaseModel
 
 from crewai.flow.flow import Flow, start, listen, router
 
-from deneme.crews.TexttoSpeech_crew.text_to_speech import TexttoSpeech
-from deneme.crews.VoiceDecision_crew.voice_decision import VoiceDecision
-from deneme.crews.VoiceWithPhoto_crew.voice_with_photo import VoiceWithPhoto
-from deneme.crews.TextResponse_crew.text_response import TextResponse
-from deneme.crews.PhotoDecision_crew.photo_decision import PhotoDecision
-from deneme.crews.TexttoPhoto_crew.text_to_photo import TexttoPhoto, dalle
-from deneme.crews.TextWithPhoto_crew.text_with_photo import TextWithPhoto
+from TelegramBot.TelegramBotFlow.crews.TexttoSpeech_crew.text_to_speech import TexttoSpeech
+from TelegramBot.TelegramBotFlow.crews.VoiceDecision_crew.voice_decision import VoiceDecision
+from TelegramBot.TelegramBotFlow.crews.VoiceWithPhoto_crew.voice_with_photo import VoiceWithPhoto
+from TelegramBot.TelegramBotFlow.crews.TextResponse_crew.text_response import TextResponse
+from TelegramBot.TelegramBotFlow.crews.PhotoDecision_crew.photo_decision import PhotoDecision
+from TelegramBot.TelegramBotFlow.crews.TexttoPhoto_crew.text_to_photo import TexttoPhoto, dalle
+from TelegramBot.TelegramBotFlow.crews.TextWithPhoto_crew.text_with_photo import TextWithPhoto
 
 from db.redis_connection import RedisConnection
 

@@ -1,6 +1,0 @@
-text_to_photo_task:
-  description: >
-    Verilen metni fotoğrafa dönüştür.
-  expected_output: >
-    {conversation_context} metnindeki physical_features değişkenine uygun olan doğal ve gerçekçi fotoğraf.
-  agent: text_to_photo_agent

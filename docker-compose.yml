@@ -1,0 +1,18 @@
+services:
+  deneme:
+    build:
+      context: .
+      dockerfile: docker/python/Dockerfile
+    ports:
+      - "8000:80"
+    env_file:
+      - .env
+    volumes:
+      - TelegramBotFlow:/app
+    depends_on:
+      - redis
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
