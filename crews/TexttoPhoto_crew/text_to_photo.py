@@ -1,7 +1,7 @@
 from crewai import Agent, Crew, Process, Task, LLM
-from crewai.project import CrewBase, agent, crew, task, before_kickoff, after_kickoff
+from crewai.project import CrewBase, agent, crew, task
 from dotenv import load_dotenv
-from TelegramBot.TelegramBotFlow.tools.dalle_tool import DallETool
+from TelegramBot.tools.dalle_tool import DallETool
 import os
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')

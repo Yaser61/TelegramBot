@@ -1,7 +1,7 @@
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 from dotenv import load_dotenv
-from TelegramBot.TelegramBotFlow.tools.elevenlabs_tool import ElevenLabsTool
+from TelegramBot.tools.elevenlabs_tool import ElevenLabsTool
 import os
 
 env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')

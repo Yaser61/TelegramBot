@@ -1,4 +1,4 @@
-src/deneme/.env
+.env
 __pycache__/
 report.md
 uv.lock

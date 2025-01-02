@@ -2,3 +2,8 @@ crewai
 crewai-tools
 uv
 python-dotenv
+redis
+requests
+pydantic
+python-telegram-bot
+elevenlabs
