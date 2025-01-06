@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from openai import AzureOpenAI
 from pydantic import BaseModel
 
-from crewai_tools.tools.base_tool import BaseTool
+from crewai.tools.base_tool import BaseTool
 
 class ImagePromptSchema(BaseModel):
     """Input for Dall-E Tool."""

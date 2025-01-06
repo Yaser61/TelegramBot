@@ -4,6 +4,7 @@ import os
 import requests
 import json
 from dotenv import load_dotenv
+from litellm.proxy.management_endpoints.internal_user_endpoints import user_update
 
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
@@ -12,19 +13,20 @@ from pydantic import BaseModel
 
 from crewai.flow.flow import Flow, start, listen, router
 
-from TelegramBot.crews.TexttoSpeech_crew.text_to_speech import TexttoSpeech
-from TelegramBot.crews.VoiceDecision_crew.voice_decision import VoiceDecision
-from TelegramBot.crews.VoiceWithPhoto_crew.voice_with_photo import VoiceWithPhoto
-from TelegramBot.crews.TextResponse_crew.text_response import TextResponse
-from TelegramBot.crews.PhotoDecision_crew.photo_decision import PhotoDecision
-from TelegramBot.crews.TexttoPhoto_crew.text_to_photo import TexttoPhoto, dalle
-from TelegramBot.crews.TextWithPhoto_crew.text_with_photo import TextWithPhoto
+from crews.TexttoSpeech_crew.text_to_speech import TexttoSpeech
+from crews.VoiceDecision_crew.voice_decision import VoiceDecision
+from crews.VoiceWithPhoto_crew.voice_with_photo import VoiceWithPhoto
+from crews.TextResponse_crew.text_response import TextResponse
+from crews.PhotoDecision_crew.photo_decision import PhotoDecision
+from crews.TexttoPhoto_crew.text_to_photo import TexttoPhoto, dalle
+from crews.TextWithPhoto_crew.text_with_photo import TextWithPhoto
 
-from TelegramBot.db.redis_connection import RedisConnection
+from db.redis_connection import RedisConnection
 
 load_dotenv()
 
 class AutoResponderState(BaseModel):
+    username: str = ""
     user_message: str = ""
     chat_history: list = ()
     generated_response: str = ""
@@ -54,23 +56,19 @@ class TelegramBotFlow(Flow[AutoResponderState]):
         try:
             photo_decision_crew = PhotoDecision().crew()
             inputs = {
-                "conversation_context": {
-                    "user_message": self.state.user_message,
-                }
+                    "user_message": self.state.user_message
             }
 
-            self.state.photo_decision_result = photo_decision_crew.kickoff(inputs=inputs)
+            self.state.photo_decision_result = photo_decision_crew.kickoff(inputs=inputs).raw
 
             voice_decision_crew = VoiceDecision().crew()
             inputs = {
-                "conversation_context": {
-                    "user_message": self.state.user_message,
-                }
+                    "user_message": self.state.user_message
             }
 
-            self.state.voice_decision_result = voice_decision_crew.kickoff(inputs=inputs)
+            self.state.voice_decision_result = voice_decision_crew.kickoff(inputs=inputs).raw
 
-            if self.state.photo_decision_result.raw == "yes":
+            if self.state.photo_decision_result == "yes":
                 return "generate_response_with_photo"
             else:
                 return "generate_response_without_photo"
@@ -87,23 +85,22 @@ class TelegramBotFlow(Flow[AutoResponderState]):
         try:
             text_to_photo_crew = TexttoPhoto().crew()
             inputs = {
-                "conversation_context": {
                     "physical_features": self.state.physical_features
-                }
             }
 
             photo = text_to_photo_crew.kickoff(inputs=inputs)
 
             self.state.generated_photo = photo if photo else "Fotoğraf oluşturulamadı."
 
-            if self.state.voice_decision_result.raw == "yes":
+            chat_history_json = json.dumps(self.state.chat_history, ensure_ascii=False)
+
+            if self.state.voice_decision_result == "yes":
                 voice_response_crew = VoiceWithPhoto().crew()
                 inputs = {
-                    "conversation_context": {
-                        "chat_history": self.state.chat_history,
+                        "username": self.state.username,
+                        "chat_history": chat_history_json,
                         "user_message": self.state.user_message,
                         "physical_features": self.state.physical_features
-                    }
                 }
 
                 response = voice_response_crew.kickoff(inputs=inputs).raw
@@ -123,11 +120,10 @@ class TelegramBotFlow(Flow[AutoResponderState]):
             else:
                 response_withphoto = TextWithPhoto().crew()
                 inputs = {
-                    "conversation_context": {
+                        "username": self.state.username,
                         "user_message": self.state.user_message,
-                        "chat_history": self.state.chat_history,
+                        "chat_history": chat_history_json,
                         "physical_features": self.state.physical_features
-                    }
                 }
 
                 response = response_withphoto.kickoff(inputs=inputs)
@@ -147,13 +143,14 @@ class TelegramBotFlow(Flow[AutoResponderState]):
         """
         try:
 
-            if self.state.voice_decision_result.raw == "yes":
+            chat_history_json = json.dumps(self.state.chat_history, ensure_ascii=False)
+
+            if self.state.voice_decision_result == "yes":
                 voice_response_crew = TexttoSpeech().crew()
                 inputs = {
-                    "conversation_context": {
+                        "username": self.state.username,
                         "user_message": self.state.user_message,
-                        "chat_history": self.state.chat_history
-                    }
+                        "chat_history": chat_history_json
                 }
 
                 response = voice_response_crew.kickoff(inputs=inputs).raw
@@ -173,14 +170,13 @@ class TelegramBotFlow(Flow[AutoResponderState]):
             else:
                 text_response_crew = TextResponse().crew()
                 inputs = {
-                    "conversation_context": {
+                        "username": self.state.username,
                         "user_message": self.state.user_message,
-                        "chat_history": self.state.chat_history
-                    }
+                        "chat_history": chat_history_json
                 }
 
                 response = text_response_crew.kickoff(inputs=inputs)
-                self.state.generated_response = str(response)
+                self.state.generated_response = response.raw
 
         except Exception as e:
             logging.error(f"Response generation error: {e}")
@@ -205,11 +201,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         redis_client.rpush(redis_key, json.dumps({"sender": username, "message": user_message}))
 
         flow = TelegramBotFlow()
-        await flow.kickoff_async(inputs={
-            "user_message": update.message.text,
-            "chat_history": chat_history,
-            "physical_features": flow.state.physical_features
-        })
+        flow.state.username = username
+        flow.state.user_message = update.message.text
+        flow.state.chat_history = chat_history
+        flow.state.physical_features = flow.state.physical_features
+        await flow.kickoff_async()
 
         print(f"{username}:, {user_message}")
 
@@ -219,7 +215,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if flow.state.generated_photo and flow.state.generated_photo != "Fotoğraf oluşturulamadı.":
-        if flow.state.voice_decision_result.raw == "yes":
+        if flow.state.voice_decision_result == "yes":
             photo = requests.get(flow.state.generated_photo)
             photo_data = photo.content
             await update.message.reply_photo(photo_data)
@@ -232,7 +228,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             redis_client.rpush(redis_key, json.dumps({"sender": "bot", "message": flow.state.generated_response}))
             redis_client.ltrim(redis_key, -100, -1)
     else:
-        if flow.state.voice_decision_result.raw == "yes":
+        if flow.state.voice_decision_result == "yes":
             await update.message.reply_audio(flow.state.generated_response)
         else:
             await update.message.reply_text(flow.state.generated_response)

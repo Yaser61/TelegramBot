@@ -1,6 +1,7 @@
 voice_decision_task:
   description: >
     Kullanıcının mesajına göre sesli yanıt gerekip gerekmediğine karar ver.
+    {user_message}, kullanıcı mesajını içerir.
   expected_output: >
-    {conversation_context} içerisindeki "user_message" mesajında direkt veya dolaylı olarak ses talebi varsa "yes" yoksa "no".
+    {user_message} mesajında direkt veya dolaylı olarak ses talebi varsa "yes", yoksa "no".
   agent: voice_decision_agent

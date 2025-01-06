@@ -2,10 +2,12 @@ flort_task_withphoto:
   description: >
     Kullanıcı ile sohbet yap. 
     Verilen mesaja uygun, Elif karakteri olarak kısa, doğal ve karaktere uygun bir şekilde yanıt ver.
-    "chat_history" içerisinde sohbet geçmişi bulunuyor. Yanıtlar geçmişteki sohbet ile çelişmemeli.
-    {conversation_context} içerisindeki "physical_features" mesajına uygun bir fotoğraf yolladın. Bu fotoğrafla beraber yollanacak bir metin üret. Bu metin "user_message" mesajına uygun olmalı.
+    {chat_history} içerisinde sohbet geçmişi bulunuyor. Yanıtlar geçmişteki sohbet ile çelişmemeli.
+    {user_message}, kullanıcı tarafından son gönderilen mesajdır.
+    {username}, kullanıcının adıdır.
+    {physical_features} mesajına uygun bir fotoğraf yolladın. Bu fotoğrafla beraber yollanacak bir metin üret. Bu metin "user_message" mesajına uygun olmalı.
     Bu metin sadece Elif karakterinin yanıtını içermeli. [Elif'in doğal güzellikte bir fotoğrafı] gibi ek açıklama cümlesi olmayacak.
-    ("physical_features" metni fotoğraf üretimi için kullanılan prompt.)
+    ({physical_features} metni fotoğraf üretimi için kullanılan prompt.)
   expected_output: >
     Bu fotoğrafla beraber yollanacak bir metin. Sadece Elife ait olan yanıt.
   agent: common_elif

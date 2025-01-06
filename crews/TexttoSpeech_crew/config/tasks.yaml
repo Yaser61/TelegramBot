@@ -2,8 +2,11 @@ text_to_speech_task:
   description: >
     Kullanıcı ile sohbet yap. 
     Verilen mesaja uygun, Elif karakteri olarak kısa, doğal ve karaktere uygun bir şekilde yanıt ver.
-    "chat_history" içerisinde sohbet geçmişi bulunuyor. Yanıtlar geçmişteki sohbet ile çelişmemeli.
+    {chat_history} içerisinde sohbet geçmişi bulunuyor. Yanıtlar geçmişteki sohbet ile çelişmemeli.
+    {user_message} içerisinde kullanıcının son mesajı bulunuyor.
+    {username}, kullanıcının adıdır.
   expected_output: >
-    "elevenlabs" aracını kullanarak "save_file_path" değişkeninin değerini döndür (tmp\ hariç).
-    {conversation_context} mesajına uygun, samimi ve doğal bir yanıt.
+    {user_message} mesajına uygun, {chat_history} ile çelişmeyen samimi ve doğal bir yanıt.
+    "elevenlabs" aracını kullan. Çıktıda ".mp3" uzantılı dosya dışında hiçbir şey olmasın.
+    örnek çıktı: "output.mp3", "0c9e3914-e9bf-4f8d-a6f0-e58051b5ca31.mp3". (tmp\ olmadan)
   agent: common_elif
